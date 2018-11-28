@@ -27,7 +27,6 @@ var webgl_quadFeature = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      s_init = this._init,
       s_update = this._update,
       m_modelViewUniform,
       m_actor_image, m_actor_color, m_glBuffers = {}, m_imgposbuf,
@@ -173,6 +172,22 @@ var webgl_quadFeature = function (arg) {
   }
 
   /**
+   * List vgl actors.
+   *
+   * @returns {vgl.actor[]} The list of actors.
+   */
+  this.actors = function () {
+    var actors = [];
+    if (m_actor_image) {
+      actors.push(m_actor_image);
+    }
+    if (m_actor_color) {
+      actors.push(m_actor_color);
+    }
+    return actors;
+  };
+
+  /**
    * Build this feature.
    */
   this._build = function () {
@@ -273,7 +288,8 @@ var webgl_quadFeature = function (arg) {
 
   /**
    * Check all of the image quads.  If any do not have the correct texture,
-   * update them. */
+   * update them.
+   */
   this._updateTextures = function () {
     var texture;
 
@@ -422,16 +438,9 @@ var webgl_quadFeature = function (arg) {
   };
 
   /**
-   * Initialize.
+   * Cleanup.
    */
-  this._init = function () {
-    s_init.call(m_this, arg);
-  };
-
-  /**
-   * Destroy.
-   */
-  this._exit = function () {
+  this._cleanup = function () {
     if (m_actor_image) {
       m_this.renderer().contextRenderer().removeActor(m_actor_image);
       m_actor_image = null;
@@ -440,6 +449,26 @@ var webgl_quadFeature = function (arg) {
       m_this.renderer().contextRenderer().removeActor(m_actor_color);
       m_actor_color = null;
     }
+    m_imgposbuf = undefined;
+    m_clrposbuf = undefined;
+    Object.keys(m_glBuffers).forEach(function (key) { delete m_glBuffers[key]; });
+    if (m_quads && m_quads.imgQuads) {
+      m_quads.imgQuads.forEach(function (quad) {
+        if (quad.texture) {
+          delete quad.texture;
+          delete quad.image._texture;
+        }
+      });
+      m_this._updateTextures();
+    }
+    m_this.modified();
+  };
+
+  /**
+   * Destroy.
+   */
+  this._exit = function () {
+    m_this._cleanup();
     s_exit.call(m_this);
   };
 

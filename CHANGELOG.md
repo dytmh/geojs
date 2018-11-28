@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Layers that use webgl renderers automatically share contexts when possible.  Layers can switch renderers manually as well.  This largely avoids the limitation of number of webgl contexts in a browser.
+
 ### Changes
 - Rename the d3 renderer to svg.  d3 still works as an alias (#965)
 - Rename the vgl renderer to webgl.  vgl still works as an alias (#965)
